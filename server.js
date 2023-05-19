@@ -4,8 +4,27 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const https = require("https");
+const colors = require("colors")
 
 const app = express();
+
+const printNetworkAddresses = () => {
+  const { networkInterfaces } = require("os");
+
+  const nets = networkInterfaces();
+  const results = [];
+  for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+          // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+          // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+          const familyV4Value = typeof net.family === "string" ? "IPv4" : 4;
+          if (net.family === familyV4Value && !net.internal) {
+              console.log(net.address.bold)
+          }
+      }
+  }
+};
+
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -36,12 +55,11 @@ app.get("/files", (req, res) => {
   const directoryPath = path.join(__dirname, "uploads");
 
   fs.readdir(directoryPath, (err, files) => {
-    if (err) {
+    if (err || !files) {
       res.status(500).send({ error: "Unable to scan directory" });
     }
 
     const fileInfos = [];
-
     files.forEach((file) => {
       const fileInfo = {
         name: file,
@@ -81,5 +99,7 @@ const options = {
 
 console.clear();
 https.createServer(options, app).listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+  console.log(`Сервер запущен на ${PORT}\n`.rainbow);
+  console.log("IP адреса на сети:".bgWhite)
+  printNetworkAddresses()
 });
