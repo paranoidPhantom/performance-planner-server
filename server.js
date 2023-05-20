@@ -90,6 +90,12 @@ app.use(
   express.static("uploads")
 );
 
+const setTerminalTitle = (title) => {
+  process.stdout.write(
+    String.fromCharCode(27) + "]0;" + title + String.fromCharCode(7)
+  );
+}
+
 // Start the HTTPS server
 const PORT = process.env.PORT || 5000;
 const options = {
@@ -99,7 +105,9 @@ const options = {
 
 console.clear();
 https.createServer(options, app).listen(PORT, () => {
-  console.log(`Сервер запущен на ${PORT}\n`.rainbow);
-  console.log("IP адреса на сети:".bgWhite)
+  setTerminalTitle(`Сервер на порте ${PORT}`)
+  console.log(`Сервер запущен на порте ${PORT}\n______ _______ __ _____ ____\n`.rainbow);
+  console.log("IP адреса на сети:\n".bold)
+  
   printNetworkAddresses()
 });
