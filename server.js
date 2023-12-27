@@ -3,7 +3,7 @@ const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const https = require("https");
+const http = require("http");
 const colors = require("colors")
 
 const app = express();
@@ -56,7 +56,9 @@ app.get("/files", (req, res) => {
 
   fs.readdir(directoryPath, (err, files) => {
     if (err || !files) {
-      res.status(500).send({ error: "Unable to scan directory" });
+	    res.status(500).send({ error: "Unable to scan directory" });
+		console.error(err)
+		return
     }
 
     const fileInfos = [];
@@ -98,13 +100,9 @@ const setTerminalTitle = (title) => {
 
 // Start the HTTPS server
 const PORT = process.env.PORT || 5000;
-const options = {
-  key: fs.readFileSync("private-key.pem"),
-  cert: fs.readFileSync("certificate.pem"),
-};
 
 console.clear();
-https.createServer(options, app).listen(PORT, () => {
+http.createServer(app).listen(PORT, () => {
   setTerminalTitle(`Сервер на порте ${PORT}`)
   console.log(`Сервер запущен на порте ${PORT}\n______ _______ __ _____ ____\n`.rainbow);
   console.log("IP адреса на сети:\n".bold)
